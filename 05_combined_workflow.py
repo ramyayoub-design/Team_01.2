@@ -3,11 +3,15 @@
 
 This script demonstrates the complete workflow:
 1. Fetch model from source
-2. Modify geometry (copy Module 01 with Z offset)
-3. Add Designer properties to old and new modules
-4. Send to Team_01.2 model
+2. Restructure hierarchy:
+   - Rename root document to "Specklepy"
+   - Rename "Layer 01" to "Old_modules"
+3. Add Designer properties to Module 01 and Module 03 in Old_modules
+4. Copy Module 01 with Z offset and place in new "New_modules" collection
+5. Add Designer property to New_Module
+6. Send to Team_01.2 model
 
-Source: https://app.speckle.systems/projects/128262a20c/models/27fb92e1bf
+Source: https://app.speckle.systems/projects/128262a20c/models/a1014e4b32
 Destination: https://app.speckle.systems/projects/128262a20c/models/0bfddb7ab6
 """
 
@@ -131,6 +135,44 @@ def offset_mesh_vertices_z(mesh, offset_z: float):
         mesh.vertices = new_vertices
 
 
+def find_layer_by_name(obj, layer_name: str):
+    """
+    Find a layer/collection by name in the elements.
+    """
+    if not isinstance(obj, Base):
+        return None
+
+    # Check if this object itself has the name
+    obj_name = getattr(obj, "name", None)
+    if obj_name == layer_name:
+        return obj
+
+    # Search in child elements
+    elements = getattr(obj, "@elements", None) or getattr(obj, "elements", [])
+    for element in elements or []:
+        if isinstance(element, Base):
+            elem_name = getattr(element, "name", None)
+            if elem_name == layer_name:
+                return element
+            # Recursively search
+            found = find_layer_by_name(element, layer_name)
+            if found:
+                return found
+
+    return None
+
+
+def create_collection(name: str, elements: list):
+    """
+    Create a new collection/layer with the given name and elements.
+    """
+    collection = Base()
+    collection.name = name
+    collection.applicationId = str(uuid.uuid4())
+    collection["@elements"] = elements
+    return collection
+
+
 def main():
     # Authenticate
     client = get_client()
@@ -154,10 +196,23 @@ def main():
     data = operations.receive(latest_version.referenced_object, transport)
     print(f"✓ Received data from source model")
 
+    # Rename root document
+    old_root_name = getattr(data, "name", "unnamed")
+    data.name = "Specklepy"
+    print(f"✓ Renamed root: '{old_root_name}' → 'Specklepy'")
+
 
     print("\n" + "=" * 60)
-    print("STEP 2: Find and tag old modules with Designer property")
+    print("STEP 2: Restructure layers and add Designer properties")
     print("=" * 60)
+
+    # Find and rename Layer 01 to Old_modules
+    layer_01 = find_layer_by_name(data, "Layer 01")
+    if layer_01:
+        layer_01.name = "Old_modules"
+        print(f"✓ Renamed layer: 'Layer 01' → 'Old_modules'")
+    else:
+        print(f"⚠ Warning: Could not find 'Layer 01' to rename")
 
     # Find Module 01
     module_01 = find_object_by_application_id(data, MODULE_01_APP_ID)
@@ -183,7 +238,7 @@ def main():
 
 
     print("\n" + "=" * 60)
-    print("STEP 3: Copy Module 01 and create New_Module with Z offset")
+    print("STEP 3: Copy Module 01, create New_Module with Z offset")
     print("=" * 60)
 
     # Create a copy of Module 01
@@ -198,18 +253,22 @@ def main():
     print(f"  Z Offset: {Z_OFFSET} mm ({Z_OFFSET/1000} meters)")
     print(f"  Added property: Designer = {DESIGNER_NEW_MODULE}")
 
-    # Add the new module to the elements
+    # Create a new collection "New_modules" and add the new module to it
+    new_modules_collection = create_collection("New_modules", [new_module])
+    print(f"✓ Created 'New_modules' collection")
+
+    # Add the collection to the root elements
     elements = getattr(data, "@elements", None)
     if elements is not None:
-        elements.append(new_module)
+        elements.append(new_modules_collection)
     else:
         elements = getattr(data, "elements", None)
         if elements is not None:
-            elements.append(new_module)
+            elements.append(new_modules_collection)
         else:
-            data["@elements"] = [new_module]
+            data["@elements"] = [new_modules_collection]
 
-    print(f"✓ Added New_Module to model elements")
+    print(f"✓ Added 'New_modules' collection to model")
 
 
     print("\n" + "=" * 60)
@@ -226,7 +285,7 @@ def main():
         projectId=DEST_PROJECT_ID,
         modelId=DEST_MODEL_ID,
         objectId=object_id,
-        message=f"Added Designer properties and created New_Module with Z offset {Z_OFFSET}mm"
+        message=f"Restructured model: Renamed root to Specklepy, Old_modules layer, created New_modules collection with Z offset {Z_OFFSET}mm, added Designer properties"
     ))
 
     print(f"✓ Created version in Team_01.2: {version.id}")
