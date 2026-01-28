@@ -6,9 +6,9 @@ This script demonstrates the complete workflow:
 2. Restructure hierarchy:
    - Rename root document to "Specklepy"
    - Rename "Layer 01" to "Old_modules"
-3. Add Designer properties to Module 01 and Module 03 in Old_modules
-4. Copy Module 01 with Z offset and place in new "New_modules" collection
-5. Add Designer property to New_Module
+3. Add Designer properties (inside properties sub-object) to Module 01 and Module 03 in Old_modules
+4. Copy Module 01 (as BrepX) with Z offset, rename to BrepX, and place in new "New_modules" Layer
+5. Add Designer property (inside properties sub-object) to the new BrepX in New_modules
 6. Send to Team_01.2 model
 
 Source: https://app.speckle.systems/projects/128262a20c/models/a1014e4b32
@@ -44,7 +44,7 @@ Z_OFFSET = 16000.0  # <-- CHANGE THIS VALUE
 # Designer names (update these with actual student names)
 DESIGNER_MODULE_01 = "Hani Karime"
 DESIGNER_MODULE_03 = "Charles Abi Chahine"
-DESIGNER_NEW_MODULE = "Ramy Ayoub"
+DESIGNER_MODULE_02 = "Ramy Ayoub"  # For the new copied module (Module 02)
 
 
 def find_object_by_application_id(obj, target_id: str):
@@ -70,12 +70,25 @@ def find_object_by_application_id(obj, target_id: str):
 
 def deep_copy_object(obj):
     """
-    Create a deep copy of a Speckle object.
+    Create a deep copy of a Speckle object, preserving its type (e.g., BrepX).
     """
-    new_obj = Base()
+    # Get the original speckle_type to preserve it
+    original_type = getattr(obj, "speckle_type", None)
+
+    # Create new object of the same type
+    # Use the class of the original object to maintain BrepX, Mesh, etc.
+    new_obj = obj.__class__()
+
+    # If it has speckle_type, preserve it
+    if original_type:
+        new_obj.speckle_type = original_type
 
     # Copy all properties
     for key in obj.get_member_names():
+        # Skip id as we want a new one generated
+        if key == "id":
+            continue
+
         value = getattr(obj, key, None)
         if value is not None:
             try:
@@ -162,15 +175,47 @@ def find_layer_by_name(obj, layer_name: str):
     return None
 
 
-def create_collection(name: str, elements: list):
+def create_layer(name: str, geometry_objects: list):
     """
-    Create a new collection/layer with the given name and elements.
+    Create a new Layer collection that directly contains geometry objects.
+    This matches the structure of Old_modules (Layer type using Base with correct properties).
     """
-    collection = Base()
-    collection.name = name
-    collection.applicationId = str(uuid.uuid4())
-    collection["@elements"] = elements
-    return collection
+    # Create a Base object and configure it as a Layer/Collection
+    layer = Base()
+
+    # Set the speckle_type to identify it as a Collection
+    layer.speckle_type = "Speckle.Core.Models.Collection"
+
+    # Set the collection type to "layer"
+    layer["collectionType"] = "layer"
+
+    # Set the layer name
+    layer.name = name
+
+    # Generate a unique applicationId
+    layer.applicationId = str(uuid.uuid4())
+
+    # Add geometry objects directly to elements (not @elements)
+    layer["elements"] = geometry_objects
+
+    return layer
+
+
+def set_designer_property(obj, designer_name: str):
+    """
+    Set the Designer property inside the 'properties' sub-object of a module.
+    Creates the properties object if it doesn't exist.
+    """
+    # Check if properties exists
+    properties = getattr(obj, "properties", None)
+
+    if properties is None:
+        # Create a new properties object
+        properties = Base()
+        obj["properties"] = properties
+
+    # Set the Designer field inside properties
+    properties["Designer"] = designer_name
 
 
 def main():
@@ -222,8 +267,8 @@ def main():
 
     module_01_name = getattr(module_01, "name", "Module_01")
     print(f"✓ Found Module 01: {module_01_name}")
-    module_01["Designer"] = DESIGNER_MODULE_01
-    print(f"  Added property: Designer = {DESIGNER_MODULE_01}")
+    set_designer_property(module_01, DESIGNER_MODULE_01)
+    print(f"  Added property: properties.Designer = {DESIGNER_MODULE_01}")
 
     # Find Module 03
     module_03 = find_object_by_application_id(data, MODULE_03_APP_ID)
@@ -233,42 +278,48 @@ def main():
 
     module_03_name = getattr(module_03, "name", "Module_03")
     print(f"✓ Found Module 03: {module_03_name}")
-    module_03["Designer"] = DESIGNER_MODULE_03
-    print(f"  Added property: Designer = {DESIGNER_MODULE_03}")
+    set_designer_property(module_03, DESIGNER_MODULE_03)
+    print(f"  Added property: properties.Designer = {DESIGNER_MODULE_03}")
+
 
 
     print("\n" + "=" * 60)
-    print("STEP 3: Copy Module 01, create New_Module with Z offset")
+    print("STEP 3: Copy Module 01 as BrepX with Z offset in New_modules Layer")
     print("=" * 60)
 
-    # Create a copy of Module 01
+    # Create a copy of Module 01 (preserving BrepX type)
     new_module = deep_copy_object(module_01)
-    new_module.name = "New_Module"
-    new_module["Designer"] = DESIGNER_NEW_MODULE
+    new_module.name = "BrepX"  # Match naming convention in Old_modules
+
+    # Add Designer property inside properties sub-object
+    set_designer_property(new_module, DESIGNER_MODULE_02)
+    new_module.properties["Module"] = "02"
 
     # Apply Z offset to the geometry
     offset_geometry_z(new_module, Z_OFFSET)
 
-    print(f"✓ Created New_Module (copy of {module_01_name})")
+    print(f"✓ Created BrepX (copy of {module_01_name})")
+    print(f"  Type: {getattr(new_module, 'speckle_type', 'Unknown')}")
     print(f"  Z Offset: {Z_OFFSET} mm ({Z_OFFSET/1000} meters)")
-    print(f"  Added property: Designer = {DESIGNER_NEW_MODULE}")
+    print(f"  Added properties: Designer = {DESIGNER_MODULE_02}, Module = 02")
 
-    # Create a new collection "New_modules" and add the new module to it
-    new_modules_collection = create_collection("New_modules", [new_module])
-    print(f"✓ Created 'New_modules' collection")
+    # Create a new Layer "New_modules" and add the BrepX directly to it
+    # This matches the structure of Old_modules (Layer > BrepX)
+    new_modules_layer = create_layer("New_modules", [new_module])
+    print(f"✓ Created 'New_modules' Layer with BrepX geometry")
 
-    # Add the collection to the root elements
+    # Add the layer to the root elements
     elements = getattr(data, "@elements", None)
     if elements is not None:
-        elements.append(new_modules_collection)
+        elements.append(new_modules_layer)
     else:
         elements = getattr(data, "elements", None)
         if elements is not None:
-            elements.append(new_modules_collection)
+            elements.append(new_modules_layer)
         else:
-            data["@elements"] = [new_modules_collection]
+            data["@elements"] = [new_modules_layer]
 
-    print(f"✓ Added 'New_modules' collection to model")
+    print(f"✓ Added 'New_modules' Layer to model")
 
 
     print("\n" + "=" * 60)
@@ -285,7 +336,7 @@ def main():
         projectId=DEST_PROJECT_ID,
         modelId=DEST_MODEL_ID,
         objectId=object_id,
-        message=f"Restructured model: Renamed root to Specklepy, Old_modules layer, created New_modules collection with Z offset {Z_OFFSET}mm, added Designer properties"
+        message=f"Restructured model: Renamed root to Specklepy, Old_modules Layer with Module 01 & 03, created New_modules Layer with BrepX (Z offset {Z_OFFSET}mm), added Designer properties to all BrepX geometries"
     ))
 
     print(f"✓ Created version in Team_01.2: {version.id}")
