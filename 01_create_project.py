@@ -1,55 +1,53 @@
 """
 01 - Create a Speckle Project
 
-This script demonstrates how to create a new project in Speckle
-and retrieve its details.
+This script demonstrates how to create a new model in an existing Speckle project
+with a folder structure using forward slashes in the name.
 
-NOTE: Projects must belong to a workspace. You can find your workspace ID
-in the Speckle web interface URL:# https://app.speckle.systems/settings/workspaces/macad-iaac/general
+NOTE: You need the PROJECT_ID of the existing project that contains the
+CW26-Sessions/homework/session03 folder structure.
+You can find it in the URL: https://app.speckle.systems/projects/PROJECT_ID
 """
 
 from main import get_client
-from specklepy.core.api.inputs.project_inputs import WorkspaceProjectCreateInput
-from specklepy.core.api.enums import ProjectVisibility
+from specklepy.core.api.inputs.model_inputs import CreateModelInput
 
 
-# TODO: Replace with your workspace ID
-# You can find it in the URL when you open your workspace in Speckle web:
-# https://app.speckle.systems/settings/workspaces/macad-iaac/general
+# TODO: Replace with your project ID
+# You can find it in the URL when you open your project in Speckle web:
+# https://app.speckle.systems/projects/PROJECT_ID
 
-WORKSPACE_ID = "a1cd06bae2"
-
+PROJECT_ID = "128262a20c"
 
 def main():
     # Authenticate
     client = get_client()
 
-    if WORKSPACE_ID == "your_workspace_id":
-        # List available workspaces to help the user
-        print("\n⚠ You need to set WORKSPACE_ID. Here are your workspaces:\n")
-        workspaces = client.active_user.get_workspaces()
-        for ws in workspaces.items:
-            print(f"  • {ws.name}: {ws.id}")
-        print("\nCopy one of the IDs above and set WORKSPACE_ID in this script.")
+    if PROJECT_ID == "your_project_id":
+        print("\n⚠ You need to set PROJECT_ID in this script.")
+        print("Find it in the Speckle project URL:")
+        print("https://app.speckle.systems/projects/YOUR_PROJECT_ID")
         return
 
-    # Create a new project inside the workspace
-    project = client.project.create_in_workspace(WorkspaceProjectCreateInput(
-        name="CW26-Sessions/homework/session03/Team_01.2",
-        description="modify the tower project to create a new project for team 01.2",
-        visibility=ProjectVisibility.PRIVATE,
-        workspaceId=WORKSPACE_ID
+    # Create a new model with folder structure
+    # The "/" in the name creates folders: homework > session03 > Team_01.2
+    model = client.model.create(CreateModelInput(
+        project_id=PROJECT_ID,
+        name="homework/session03/Team_01.2",
+        description="Tower project for team 01.2"
     ))
 
-    print(f"✓ Created project: {project.id}")
+    print(f"✓ Created model: {model.id}")
+    print(f"  Model will appear in folder: homework/session03/Team_01.2")
 
-    # Get the project details
-    project = client.project.get(project.id)
-    print(f"  Project name: {project.name}")
-    print(f"  Description:  {project.description}")
-    print(f"  Visibility:   {project.visibility}")
+    # Get the model details
+    model_details = client.model.get(model.id, PROJECT_ID)
+    print(f"  Model name: {model_details.name}")
+    print(f"  Description: {model_details.description}")
 
 
 if __name__ == "__main__":
     main()
+
+
 
