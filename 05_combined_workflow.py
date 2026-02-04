@@ -177,8 +177,8 @@ def find_layer_by_name(obj, layer_name: str):
 
 def create_layer(name: str, geometry_objects: list):
     """
-    Create a new Layer collection that directly contains geometry objects.
-    This matches the structure of Old_modules (Layer type using Base with correct properties).
+    Create a new Base collection that directly contains geometry objects.
+    This matches the structure of Old_modules (Base type without collectionType property).
     """
     # Create a Base object and configure it as a Layer/Collection
     layer = Base()
@@ -186,8 +186,8 @@ def create_layer(name: str, geometry_objects: list):
     # Set the speckle_type to identify it as a Collection
     layer.speckle_type = "Speckle.Core.Models.Collection"
 
-    # Set the collection type to "layer"
-    layer["collectionType"] = "layer"
+    # Don't set collectionType at all to display as "Base" instead of "Layer"
+    # (omitting the collectionType property makes it display as "Base")
 
     # Set the layer name
     layer.name = name
@@ -241,10 +241,13 @@ def main():
     data = operations.receive(latest_version.referenced_object, transport)
     print(f"✓ Received data from source model")
 
-    # Rename root document
+    # Rename root document and set Tower properties
     old_root_name = getattr(data, "name", "unnamed")
     data.name = "Specklepy"
+    data["collectionType"] = "Tower"
+    data["Tower"] = "Team-01.2"
     print(f"✓ Renamed root: '{old_root_name}' → 'Specklepy'")
+    print(f"  Set collectionType: Tower, Tower: Team-01.2")
 
 
     print("\n" + "=" * 60)
@@ -255,7 +258,11 @@ def main():
     layer_01 = find_layer_by_name(data, "Layer 01")
     if layer_01:
         layer_01.name = "Old_modules"
+        # Remove the collectionType property entirely to display as "Base" instead of "Layer"
+        if hasattr(layer_01, "collectionType"):
+            delattr(layer_01, "collectionType")
         print(f"✓ Renamed layer: 'Layer 01' → 'Old_modules'")
+        print(f"  Removed collectionType (displays as 'Base')")
     else:
         print(f"⚠ Warning: Could not find 'Layer 01' to rename")
 

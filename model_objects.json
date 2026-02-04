@@ -1,48 +1,50 @@
 {
   "project_id": "128262a20c",
   "model_id": "0bfddb7ab6",
-  "version_id": "066048044a",
+  "version_id": "b3d90d32be",
   "version_message": "Restructured model: Renamed root to Specklepy, Old_modules Layer with Module 01 & 03, created New_modules Layer with BrepX (Z offset 16000.0mm), added Designer properties to all BrepX geometries",
   "graphql_info": {
     "project": {
       "id": "128262a20c",
       "name": "CW26-Sessions",
       "version": {
-        "id": "066048044a",
+        "id": "b3d90d32be",
         "message": "Restructured model: Renamed root to Specklepy, Old_modules Layer with Module 01 & 03, created New_modules Layer with BrepX (Z offset 16000.0mm), added Designer properties to all BrepX geometries",
-        "createdAt": "2026-01-28T20:23:00.304Z",
-        "referencedObject": "09d53d1cc0b2fef48d18d406bbb64e80"
+        "createdAt": "2026-02-03T21:05:50.841Z",
+        "referencedObject": "68156dc6a26d38f7e947ce60412d8e34"
       }
     }
   },
   "objects": [
     {
-      "id": "09d53d1cc0b2fef48d18d406bbb64e80",
+      "id": "68156dc6a26d38f7e947ce60412d8e34",
       "speckle_type": "Speckle.Core.Models.Collections.Collection",
       "applicationId": null,
       "name": "Specklepy",
       "depth": 0,
       "properties": {
-        "units": "mm",
+        "collectionType": "Tower",
         "version": 3,
-        "totalChildrenCount": 0,
-        "id": "09d53d1cc0b2fef48d18d406bbb64e80",
+        "id": "68156dc6a26d38f7e947ce60412d8e34",
+        "units": "mm",
         "speckle_type": "Speckle.Core.Models.Collections.Collection",
+        "Tower": "Team-01.2",
+        "totalChildrenCount": 0,
         "name": "Specklepy"
       }
     },
     {
-      "id": "b8680aa66a21dd526770c848ee6a9cf7",
+      "id": "a7a7cbc6e3df9a8813ec3e7426e05a0d",
       "speckle_type": "Speckle.Core.Models.Collections.Collection:Speckle.Core.Models.Layer",
       "applicationId": "7173a954-412b-4606-b14c-c2bdb579af98",
       "name": "Old_modules",
       "depth": 1,
       "properties": {
-        "name": "Old_modules",
-        "id": "b8680aa66a21dd526770c848ee6a9cf7",
+        "id": "a7a7cbc6e3df9a8813ec3e7426e05a0d",
         "speckle_type": "Speckle.Core.Models.Collections.Collection:Speckle.Core.Models.Layer",
         "applicationId": "7173a954-412b-4606-b14c-c2bdb579af98",
-        "totalChildrenCount": 0
+        "totalChildrenCount": 0,
+        "name": "Old_modules"
       }
     },
     {
@@ -52,17 +54,17 @@
       "name": null,
       "depth": 2,
       "properties": {
-        "units": "mm",
         "volume": 3428318529658.1543,
-        "applicationId": "17cc627f-f5df-44d2-908e-1cdaf96fe76c",
+        "id": "c4992e6f1db613f6784dd1d445c73230",
+        "units": "mm",
         "area": 1319867231.5959716,
-        "totalChildrenCount": 0,
+        "speckle_type": "Objects.Geometry.BrepX",
         "properties": {
           "Module": "01",
           "Designer": "Hani Karime"
         },
-        "id": "c4992e6f1db613f6784dd1d445c73230",
-        "speckle_type": "Objects.Geometry.BrepX"
+        "totalChildrenCount": 0,
+        "applicationId": "17cc627f-f5df-44d2-908e-1cdaf96fe76c"
       }
     },
     {
@@ -72,52 +74,51 @@
       "name": null,
       "depth": 2,
       "properties": {
-        "units": "mm",
         "volume": 3428318529658.1523,
-        "applicationId": "50cae94b-00de-47e9-8e2d-15a748240fc0",
+        "id": "2f1e10ee7bc8ce9221b74175b7367033",
+        "units": "mm",
         "area": 1319867231.5959716,
-        "totalChildrenCount": 0,
+        "speckle_type": "Objects.Geometry.BrepX",
         "properties": {
           "Module": "03",
           "Designer": "Charles Abi Chahine"
         },
-        "id": "2f1e10ee7bc8ce9221b74175b7367033",
-        "speckle_type": "Objects.Geometry.BrepX"
+        "totalChildrenCount": 0,
+        "applicationId": "50cae94b-00de-47e9-8e2d-15a748240fc0"
       }
     },
     {
-      "id": "3df41db18a206f0c2dd30e5c04489002",
+      "id": "8623688c19d6bd5d4b371a1e73f79409",
       "speckle_type": "Base",
-      "applicationId": "8f8f3d49-cdb7-4ba4-a00e-44b7e604d34e",
+      "applicationId": "5f3d30a1-0842-4908-b239-a5b61b9d4df7",
       "name": "New_modules",
       "depth": 1,
       "properties": {
-        "name": "New_modules",
-        "id": "3df41db18a206f0c2dd30e5c04489002",
+        "id": "8623688c19d6bd5d4b371a1e73f79409",
         "speckle_type": "Base",
-        "applicationId": "8f8f3d49-cdb7-4ba4-a00e-44b7e604d34e",
+        "applicationId": "5f3d30a1-0842-4908-b239-a5b61b9d4df7",
         "totalChildrenCount": 0,
-        "collectionType": "layer"
+        "name": "New_modules"
       }
     },
     {
-      "id": "73f109a5f45fe84ff91356ea2a637f3b",
+      "id": "d93c59904f275b13dd1eb0d3c2472c5e",
       "speckle_type": "Base",
-      "applicationId": "4d4054fe-bb25-4682-9446-99ade90d17b3",
+      "applicationId": "92cc9485-e7d4-41c0-b900-6d2a42cb9f72",
       "name": "BrepX",
       "depth": 2,
       "properties": {
-        "units": "mm",
         "volume": 3428318529658.1543,
-        "applicationId": "4d4054fe-bb25-4682-9446-99ade90d17b3",
+        "id": "d93c59904f275b13dd1eb0d3c2472c5e",
+        "units": "mm",
         "area": 1319867231.5959716,
-        "totalChildrenCount": 0,
+        "speckle_type": "Base",
         "properties": {
           "Module": "02",
           "Designer": "Ramy Ayoub"
         },
-        "id": "73f109a5f45fe84ff91356ea2a637f3b",
-        "speckle_type": "Base",
+        "totalChildrenCount": 0,
+        "applicationId": "92cc9485-e7d4-41c0-b900-6d2a42cb9f72",
         "name": "BrepX"
       }
     }
