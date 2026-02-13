@@ -14,10 +14,12 @@ from main import get_client
 
 load_dotenv()
 
+# PROJECT_ID = "128262a20c"
+# OBJECT_ID = "1fc04b932daa9f4c6e5759c805a953f7"
 
 YOUR_TOKEN = os.environ.get("SPECKLE_TOKEN")
-PROJECT_ID = "128262a20c"
-OBJECT_ID = "d93c59904f275b13dd1eb0d3c2472c5e"
+PROJECT_ID = "e867260b42"
+OBJECT_ID = "74a16ca2cf506bac60cd5e118a769040"
 
 
 def export_object_data(speckle_client, version_info: dict = None):
@@ -92,48 +94,71 @@ subscription_query = gql("""
 
 
 
-async def subscribe_and_export():
-    """Listen for updates and auto-export on changes."""
-    speckle_client = get_client()
-    print(f"✓ Authenticated with Speckle")
-    
-    # Initial export
-    print("📦 Running initial export...")
-    export_object_data(speckle_client)
-    
+async def subscribe_to_project_updates():
+    """
+    Subscribe to project version updates using WebSocket
+    """
+    # Create WebSocket transport with authentication
     transport = WebsocketsTransport(
         url="wss://app.speckle.systems/graphql",
-        init_payload={"Authorization": f"Bearer {YOUR_TOKEN}"}
+        init_payload={
+            "Authorization": f"Bearer {YOUR_TOKEN}"
+        }
     )
     
-    client = Client(transport=transport, fetch_schema_from_transport=False)
+    # Create a GraphQL client
+    client = Client(
+        transport=transport,
+        fetch_schema_from_transport=False,
+    )
     
     try:
         async with client as session:
-            print(f"\n🔌 Connected - listening for updates on project: {PROJECT_ID}")
+            print(f"🔌 Connected to Speckle WebSocket")
+            print(f"📡 Listening for updates on project: {PROJECT_ID}")
             print("Press Ctrl+C to stop\n")
             
-            async for result in session.subscribe(
-                subscription_query,
-                variable_values={"projectId": PROJECT_ID}
-            ):
-                data = result.get("projectVersionsUpdated")
-                if data:
-                    print(f"\n📡 Update detected: {data.get('type')} on model {data.get('modelId')}")
+            try:
+                # Subscribe to the query
+                async for result in session.subscribe(
+                    subscription_query,
+                    variable_values={"projectId": PROJECT_ID}
+                ):
+                    print("=" * 50)
+                    print("📦 New Update Received!")
+                    print("=" * 50)
                     
-                    version_info = {
-                        "id": data.get("version", {}).get("id"),
-                        "message": data.get("version", {}).get("message"),
-                        "createdAt": data.get("version", {}).get("createdAt")
-                    }
+                    data = result.get("projectVersionsUpdated")
+                    if data:
+                        print(f"ID: {data.get('id')}")
+                        print(f"Model ID: {data.get('modelId')}")
+                        print(f"Type: {data.get('type')}")
+                        
+                        version = data.get('version')
+                        if version:
+                            print(f"\nVersion Details:")
+                            print(f"  - Version ID: {version.get('id')}")
+                            print(f"  - Message: {version.get('message')}")
+                            print(f"  - Created At: {version.get('createdAt')}")
+                        
+                        print("\n")
                     
-                    export_object_data(speckle_client, version_info)
-                    
+            except asyncio.CancelledError:
+                print("\n\n👋 Subscription cancelled")
+                raise
+            except KeyboardInterrupt:
+                print("\n\n👋 Subscription stopped by user")
+                raise
+            
     except (KeyboardInterrupt, asyncio.CancelledError):
-        print("\n👋 Stopped")
+        pass
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
     finally:
+        # Ensure transport is properly closed
         await transport.close()
+        print("🔌 Connection closed properly")
 
 
 if __name__ == "__main__":
-    asyncio.run(subscribe_and_export())
+    asyncio.run(subscribe_to_project_updates())
