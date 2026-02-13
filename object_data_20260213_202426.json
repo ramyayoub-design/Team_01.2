@@ -1,0 +1,36 @@
+{
+  "exportedAt": "2026-02-13T20:24:27.097661",
+  "projectId": "e867260b42",
+  "objectId": "74a16ca2cf506bac60cd5e118a769040",
+  "versionInfo": {
+    "versionId": "431d36c8e7",
+    "message": null,
+    "createdAt": "2026-02-13T17:24:25.055Z"
+  },
+  "data": {
+    "id": "74a16ca2cf506bac60cd5e118a769040",
+    "area": 35011.89642245778,
+    "units": "m",
+    "volume": 375661.2320950656,
+    "__closure": {
+      "1dee2a45be6d8ebaedb477856c3df512": 1,
+      "89bb6d990ebc721864aba470dc0aaecc": 1,
+      "d7d027dbfdbdd8ce18bc0048994a9993": 2,
+      "fec8af0912d82330a060b06f5ba3d195": 2
+    },
+    "displayValue": [
+      {
+        "__closure": null,
+        "referencedId": "89bb6d990ebc721864aba470dc0aaecc",
+        "speckle_type": "reference"
+      }
+    ],
+    "encodedValue": {
+      "__closure": null,
+      "referencedId": "1dee2a45be6d8ebaedb477856c3df512",
+      "speckle_type": "reference"
+    },
+    "speckle_type": "Objects.Geometry.ExtrusionX",
+    "applicationId": "d3ff3543-9190-4725-9fe5-f6426b49006c"
+  }
+}

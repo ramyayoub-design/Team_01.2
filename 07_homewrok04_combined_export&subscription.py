@@ -18,8 +18,8 @@ load_dotenv()
 # OBJECT_ID = "1fc04b932daa9f4c6e5759c805a953f7"
 
 YOUR_TOKEN = os.environ.get("SPECKLE_TOKEN")
-PROJECT_ID = "e867260b42"
-OBJECT_ID = "74a16ca2cf506bac60cd5e118a769040"
+PROJECT_ID = "128262a20c"
+OBJECT_ID = "47f3fc068baf83fc1053939b2893aed1"
 
 
 def export_object_data(speckle_client, version_info: dict = None):
@@ -90,6 +90,25 @@ subscription_query = gql("""
     }
 """)
 
+# Separate query to fetch full version details (sourceApplication, authorUser)
+# since the subscription payload doesn't include these fields
+version_details_query = gql("""
+    query GetVersionDetails($projectId: String!, $versionId: String!) {
+        project(id: $projectId) {
+            version(id: $versionId) {
+                id
+                message
+                createdAt
+                sourceApplication
+                authorUser {
+                    name
+                    id
+                }
+            }
+        }
+    }
+""")
+
 
 
 
@@ -133,14 +152,47 @@ async def subscribe_to_project_updates():
                         print(f"ID: {data.get('id')}")
                         print(f"Model ID: {data.get('modelId')}")
                         print(f"Type: {data.get('type')}")
-                        
+
                         version = data.get('version')
                         if version:
-                            print(f"\nVersion Details:")
-                            print(f"  - Version ID: {version.get('id')}")
+                            version_id = version.get('id')
+                            print(f"\nVersion Details (from subscription):")
+                            print(f"  - Version ID: {version_id}")
                             print(f"  - Message: {version.get('message')}")
                             print(f"  - Created At: {version.get('createdAt')}")
-                        
+
+                            # Fetch full version details via HTTP query
+                            speckle_client = get_client()
+                            try:
+                                detail_result = speckle_client.httpclient.execute(
+                                    version_details_query,
+                                    variable_values={"projectId": PROJECT_ID, "versionId": version_id}
+                                )
+                                full_version = detail_result.get("project", {}).get("version", {})
+                                authorUser = full_version.get('authorUser') or {}
+
+                                print(f"\nExtra Details (from follow-up query):")
+                                print(f"  - Source Application: {full_version.get('sourceApplication')}")
+                                print(f"  - Author: {authorUser.get('name')} (id: {authorUser.get('id')})")
+
+                                version_info = {
+                                    "versionId": version_id,
+                                    "message": version.get('message'),
+                                    "createdAt": version.get('createdAt'),
+                                    "sourceApplication": full_version.get('sourceApplication'),
+                                    "authorName": authorUser.get('name'),
+                                    "authorId": authorUser.get('id'),
+                                }
+                            except Exception as e:
+                                print(f"  ⚠ Could not fetch version details: {e}")
+                                version_info = {
+                                    "versionId": version_id,
+                                    "message": version.get('message'),
+                                    "createdAt": version.get('createdAt'),
+                                }
+
+                            export_object_data(speckle_client, version_info=version_info)
+
                         print("\n")
                     
             except asyncio.CancelledError:
