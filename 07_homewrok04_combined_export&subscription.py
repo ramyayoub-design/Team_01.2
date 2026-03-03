@@ -19,7 +19,7 @@ load_dotenv()
 
 YOUR_TOKEN = os.environ.get("SPECKLE_TOKEN")
 PROJECT_ID = "128262a20c"
-OBJECT_ID = "47f3fc068baf83fc1053939b2893aed1"
+OBJECT_ID = "0cfacbdc59243be9094a7398c83a0231"
 
 
 def export_object_data(speckle_client, version_info: dict = None):

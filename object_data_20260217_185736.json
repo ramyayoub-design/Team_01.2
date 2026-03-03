@@ -1,0 +1,40 @@
+{
+  "exportedAt": "2026-02-17T18:57:37.176509",
+  "projectId": "128262a20c",
+  "objectId": "47f3fc068baf83fc1053939b2893aed1",
+  "versionInfo": {
+    "versionId": "33de16fb10",
+    "message": "Adding Properties to Model",
+    "createdAt": "2026-02-17T15:57:34.714Z",
+    "sourceApplication": "grasshopper",
+    "authorName": "Shuai Zhang",
+    "authorId": "3bc48b06fc"
+  },
+  "data": {
+    "id": "47f3fc068baf83fc1053939b2893aed1",
+    "area": 404947431.6140968,
+    "units": "mm",
+    "volume": 428647880804.7278,
+    "__closure": {
+      "0ec175edacddf9bf572bb7751154a5b9": 2,
+      "6374741ed8097ccec38ab09f8b78edb1": 2,
+      "a77aee5d1ccf8d758fffb172b430e926": 1,
+      "df12e7c35da95b855f23ffcbb3b8dee8": 2,
+      "fc5c1f7d99cb2836418f4a81d22b4347": 1
+    },
+    "displayValue": [
+      {
+        "__closure": null,
+        "referencedId": "a77aee5d1ccf8d758fffb172b430e926",
+        "speckle_type": "reference"
+      }
+    ],
+    "encodedValue": {
+      "__closure": null,
+      "referencedId": "fc5c1f7d99cb2836418f4a81d22b4347",
+      "speckle_type": "reference"
+    },
+    "speckle_type": "Objects.Geometry.BrepX",
+    "applicationId": "b5a07cc2-5d87-420d-a8be-5f5be360093e"
+  }
+}
